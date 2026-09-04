@@ -158,9 +158,9 @@ export function MilkyWaySystem({
       dustMatRef.current.uniforms.uTime.value = time;
     }
 
-    // Gentle global orientation wobble
+    // Gentle global orientation wobble / galactic rotation
     if (groupRef.current) {
-      groupRef.current.rotation.y += activeDelta * 0.0004;
+      groupRef.current.rotation.y += activeDelta * 0.025;
     }
   });
 

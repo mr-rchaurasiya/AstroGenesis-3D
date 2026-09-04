@@ -20,10 +20,11 @@ export function UniverseScene() {
     return createDefaultMilkyWayModel(54321);
   }, []);
 
-  // Very slow ambient rotation for deep cosmological parallax
+  // Ambient cosmic rotation for deep cosmological parallax
   useFrame((_state, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.0001;
+    if (groupRef.current && !useAppStore.getState().isPaused) {
+      const scale = useAppStore.getState().timeScale;
+      groupRef.current.rotation.y += delta * 0.02 * Math.min(5, scale);
     }
   });
 
