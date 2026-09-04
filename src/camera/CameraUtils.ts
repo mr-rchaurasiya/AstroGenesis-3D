@@ -217,3 +217,39 @@ export function calculateScaleAwareZoomSpeed(cameraDistance: number): number {
   if (cameraDistance < 1000.0) return 1.2;
   return 1.8;
 }
+
+/**
+ * Computes exact camera position and look-at target for framing any celestial body on its illuminated day side.
+ */
+export function computeTargetFraming(
+  targetInfo: CameraTargetInfo
+): { cameraPosition: [number, number, number]; targetPosition: [number, number, number] } {
+  const targetPos = new THREE.Vector3(...targetInfo.position);
+
+  // If central Sun, star, or near barycenter
+  if (targetInfo.id === 'sun' || targetInfo.id === 'sol' || targetInfo.type === 'star' || targetPos.lengthSq() < 0.1) {
+    const offset = new THREE.Vector3(0, targetInfo.framingDistance * 0.35, targetInfo.framingDistance).normalize();
+    const camPos = targetPos.clone().add(offset.multiplyScalar(targetInfo.framingDistance));
+    return {
+      cameraPosition: [camPos.x, camPos.y, camPos.z],
+      targetPosition: [targetPos.x, targetPos.y, targetPos.z],
+    };
+  }
+
+  // For planets/moons orbiting the Sun:
+  // Sun is at [0, 0, 0]. Vector from Planet towards Sun:
+  const toSun = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), targetPos).normalize();
+  const side = new THREE.Vector3(-toSun.z, 0.38, toSun.x).normalize();
+  
+  // Blend sunward vector (day side) + side angle + slight elevation
+  const viewOffset = toSun.clone().multiplyScalar(0.72)
+    .add(side.multiplyScalar(0.48))
+    .add(new THREE.Vector3(0, 0.35, 0))
+    .normalize();
+
+  const camPos = targetPos.clone().add(viewOffset.multiplyScalar(targetInfo.framingDistance));
+  return {
+    cameraPosition: [camPos.x, camPos.y, camPos.z],
+    targetPosition: [targetPos.x, targetPos.y, targetPos.z],
+  };
+}

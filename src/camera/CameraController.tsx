@@ -13,6 +13,7 @@ import {
   resolveLiveTargetInfo,
   calculateAdaptiveClippingPlanes,
   calculateScaleAwareZoomSpeed,
+  computeTargetFraming,
 } from './CameraUtils';
 import {
   smoothDampVector3,
@@ -136,20 +137,11 @@ export const CameraController: React.FC = () => {
     const targetInfo = resolveLiveTargetInfo(focusTargetId, currentSimDays, solarScaleMode);
     if (!targetInfo) return;
 
-    const targetVec = new THREE.Vector3(...targetInfo.position);
-    
-    // Position camera facing the sunlit side of the planet with pleasant 3D elevation
-    let sunDir = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), targetVec).normalize();
-    if (sunDir.lengthSq() < 0.001) {
-      sunDir = new THREE.Vector3(0.5, 0.35, 0.8).normalize();
-    }
-    const sideDir = new THREE.Vector3(-sunDir.z, 0.4, sunDir.x).normalize();
-    const offsetDir = sunDir.clone().multiplyScalar(0.7).add(sideDir.multiplyScalar(0.5)).add(new THREE.Vector3(0, 0.35, 0)).normalize();
-    const cameraPos = targetVec.clone().add(offsetDir.multiplyScalar(targetInfo.framingDistance));
+    const { cameraPosition, targetPosition } = computeTargetFraming(targetInfo);
 
     startTransition(
-      [cameraPos.x, cameraPos.y, cameraPos.z],
-      [targetVec.x, targetVec.y, targetVec.z],
+      cameraPosition,
+      targetPosition,
       focusTargetId,
       true
     );
@@ -298,11 +290,9 @@ export const CameraController: React.FC = () => {
       if (tr.targetId) {
         const liveInfo = resolveLiveTargetInfo(tr.targetId, simTimeDays, solarScaleMode);
         if (liveInfo) {
-          tr.endTarget = liveInfo.position;
-          const targetVec = new THREE.Vector3(...liveInfo.position);
-          const offsetDir = new THREE.Vector3(0.5, 0.35, 0.8).normalize();
-          const cameraPos = targetVec.clone().add(offsetDir.multiplyScalar(liveInfo.framingDistance));
-          tr.endPos = [cameraPos.x, cameraPos.y, cameraPos.z];
+          const { cameraPosition, targetPosition } = computeTargetFraming(liveInfo);
+          tr.endTarget = targetPosition;
+          tr.endPos = cameraPosition;
         }
       }
 
