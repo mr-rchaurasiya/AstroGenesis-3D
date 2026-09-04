@@ -127,3 +127,36 @@ export const SunFragmentShader = /* glsl */ `
     gl_FragColor = vec4(finalColor, 1.0);
   }
 `;
+
+export const SunCoronaVertexShader = /* glsl */ `
+  varying vec3 vNormal;
+  varying vec3 vViewPosition;
+
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    vViewPosition = -mvPosition.xyz;
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+export const SunCoronaFragmentShader = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uOpacity;
+  uniform float uPower;
+
+  varying vec3 vNormal;
+  varying vec3 vViewPosition;
+
+  void main() {
+    vec3 N = normalize(vNormal);
+    vec3 V = normalize(vViewPosition);
+
+    // Fresnel rim glow on outer sphere
+    float viewDot = clamp(dot(N, V), 0.0, 1.0);
+    float glow = pow(1.0 - viewDot, uPower);
+
+    gl_FragColor = vec4(uColor, glow * uOpacity);
+  }
+`;
+

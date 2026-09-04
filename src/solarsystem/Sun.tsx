@@ -8,7 +8,12 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { SUN_DATA } from './SolarSystemConfig';
-import { SunVertexShader, SunFragmentShader } from '../shaders/SunShader';
+import {
+  SunVertexShader,
+  SunFragmentShader,
+  SunCoronaVertexShader,
+  SunCoronaFragmentShader,
+} from '../shaders/SunShader';
 import type { ScaleMode } from './SolarSystemTypes';
 
 interface SunProps {
@@ -42,11 +47,46 @@ export function Sun({
     });
   }, []);
 
+  // 3D Spherical Corona Materials (Inner & Outer Atmosphere Glow)
+  const innerCoronaMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      vertexShader: SunCoronaVertexShader,
+      fragmentShader: SunCoronaFragmentShader,
+      uniforms: {
+        uColor: { value: new THREE.Color('#ffa834') },
+        uOpacity: { value: 0.7 },
+        uPower: { value: 2.2 },
+      },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.FrontSide,
+    });
+  }, []);
+
+  const outerCoronaMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      vertexShader: SunCoronaVertexShader,
+      fragmentShader: SunCoronaFragmentShader,
+      uniforms: {
+        uColor: { value: new THREE.Color('#ff6a00') },
+        uOpacity: { value: 0.4 },
+        uPower: { value: 3.5 },
+      },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.FrontSide,
+    });
+  }, []);
+
   useEffect(() => {
     return () => {
       sunMaterial.dispose();
+      innerCoronaMaterial.dispose();
+      outerCoronaMaterial.dispose();
     };
-  }, [sunMaterial]);
+  }, [sunMaterial, innerCoronaMaterial, outerCoronaMaterial]);
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
@@ -80,17 +120,12 @@ export function Sun({
         decay={1.2}
       />
 
-      {/* ── 3. Outer Coronal Glow Sprite ── */}
-      <mesh scale={[radius * 2.6, radius * 2.6, 1]}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial
-          color="#ffaa33"
-          transparent
-          opacity={0.35}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          side={THREE.DoubleSide}
-        />
+      {/* ── 3. 3D Volumetric Coronal Glow Spheres (360° Spherical Aura) ── */}
+      <mesh material={innerCoronaMaterial}>
+        <sphereGeometry args={[radius * 1.15, 32, 32]} />
+      </mesh>
+      <mesh material={outerCoronaMaterial}>
+        <sphereGeometry args={[radius * 1.38, 32, 32]} />
       </mesh>
 
       {/* ── 4. Selection Highlight Indicator ── */}
