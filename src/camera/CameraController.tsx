@@ -62,6 +62,9 @@ export const CameraController: React.FC = () => {
     controls.enablePan = true;
     controls.enableZoom = false; // Custom cursor-centric zoom handles wheel events
     controls.enableRotate = true;
+    // Prevent polar singularity / gimbal flip which causes NaN view matrices
+    controls.minPolarAngle = 0.05;
+    controls.maxPolarAngle = Math.PI - 0.05;
     controls.mouseButtons = {
       LEFT: THREE.MOUSE.ROTATE,
       MIDDLE: THREE.MOUSE.PAN,
@@ -71,9 +74,18 @@ export const CameraController: React.FC = () => {
     controls.maxDistance = 80000;
     controls.rotateSpeed = 0.5;
     controls.panSpeed = 0.8;
+
+    const handleStart = () => {
+      transitionRef.current = null;
+      if (useAppStore.getState().cameraMode === 'TRANSITION') {
+        useAppStore.getState().setCameraMode('FREE');
+      }
+    };
+    controls.addEventListener('start', handleStart);
     controlsRef.current = controls;
 
     return () => {
+      controls.removeEventListener('start', handleStart);
       controls.dispose();
       controlsRef.current = null;
     };
@@ -101,6 +113,8 @@ export const CameraController: React.FC = () => {
       // Determine scale-aware zoom speed
       const cam = camera as THREE.PerspectiveCamera;
       const currentDist = cam.position.distanceTo(controls.target);
+      if (isNaN(currentDist) || currentDist <= 0.01) return;
+
       const zoomIntensity = Math.min(0.002, Math.max(0.0008, 0.0012 * (1 + Math.log10(Math.max(1, currentDist)) * 0.1)));
       const zoomFactor = Math.exp(e.deltaY * zoomIntensity);
 
@@ -118,26 +132,33 @@ export const CameraController: React.FC = () => {
 
       // Create plane perpendicular to camera viewing direction passing through controls.target
       const camForward = new THREE.Vector3().subVectors(controls.target, cam.position).normalize();
-      const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camForward, controls.target);
+      if (camForward.lengthSq() < 0.001) return;
 
+      const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camForward, controls.target);
       const intersection = new THREE.Vector3();
       const hit = ray.intersectPlane(plane, intersection);
 
-      if (hit) {
-        // Point under cursor in 3D world space
-        const pivot = intersection;
+      if (hit && !isNaN(intersection.x) && !isNaN(intersection.y) && !isNaN(intersection.z)) {
+        const distFromTarget = intersection.distanceTo(controls.target);
+        // Only apply pivot offset if intersection is within reasonable distance
+        if (distFromTarget < currentDist * 3.0) {
+          const pivot = intersection;
+          const newCamPos = pivot.clone().add(cam.position.clone().sub(pivot).multiplyScalar(zoomFactor));
+          const newTarget = pivot.clone().add(controls.target.clone().sub(pivot).multiplyScalar(zoomFactor));
 
-        // Scale camera position and target relative to the cursor pivot point
-        const newCamPos = pivot.clone().add(cam.position.clone().sub(pivot).multiplyScalar(zoomFactor));
-        const newTarget = pivot.clone().add(controls.target.clone().sub(pivot).multiplyScalar(zoomFactor));
+          if (!isNaN(newCamPos.x) && !isNaN(newTarget.x)) {
+            cam.position.copy(newCamPos);
+            controls.target.copy(newTarget);
+            return;
+          }
+        }
+      }
 
-        cam.position.copy(newCamPos);
-        controls.target.copy(newTarget);
-      } else {
-        // Fallback: standard camera forward zoom
-        const newCamPos = controls.target.clone().add(
-          cam.position.clone().sub(controls.target).multiplyScalar(zoomFactor)
-        );
+      // Fallback: standard camera forward zoom
+      const newCamPos = controls.target.clone().add(
+        cam.position.clone().sub(controls.target).multiplyScalar(zoomFactor)
+      );
+      if (!isNaN(newCamPos.x)) {
         cam.position.copy(newCamPos);
       }
     };
@@ -328,6 +349,14 @@ export const CameraController: React.FC = () => {
     const safeDelta = Math.min(0.1, Math.max(0.001, delta));
     const now = performance.now() / 1000;
 
+    // Safety recovery: Ensure camera position and target never stay NaN
+    if (isNaN(frameCamera.position.x) || isNaN(frameCamera.position.y) || isNaN(frameCamera.position.z)) {
+      frameCamera.position.set(0, 60, 95);
+    }
+    if (isNaN(controls.target.x) || isNaN(controls.target.y) || isNaN(controls.target.z)) {
+      controls.target.set(0, 0, 0);
+    }
+
     const simTimeDays = useAppStore.getState().solarSimulationTimeDays;
 
     // ── 1. TRANSITION MODE ──────────────────────────────────────────────────
@@ -365,8 +394,10 @@ export const CameraController: React.FC = () => {
         safeDelta
       );
 
-      frameCamera.position.copy(newPos);
-      controls.target.copy(newTarget);
+      if (!isNaN(newPos.x) && !isNaN(newTarget.x)) {
+        frameCamera.position.copy(newPos);
+        controls.target.copy(newTarget);
+      }
 
       // Arrival condition
       if (tNorm >= 1.0 || (frameCamera.position.distanceTo(targetPos) < 0.2 && controls.target.distanceTo(targetLookAt) < 0.2)) {
@@ -432,14 +463,24 @@ export const CameraController: React.FC = () => {
     if (keys['Q'] || keys['KeyQ'] || keys['ArrowUp']) {
       // Orbit pitch up
       const offset = frameCamera.position.clone().sub(controls.target);
-      const right = new THREE.Vector3().crossVectors(offset, new THREE.Vector3(0, 1, 0)).normalize();
+      let right = new THREE.Vector3().crossVectors(offset, new THREE.Vector3(0, 1, 0));
+      if (right.lengthSq() < 0.0001) {
+        right = new THREE.Vector3(1, 0, 0);
+      } else {
+        right.normalize();
+      }
       offset.applyAxisAngle(right, -safeDelta * 0.8);
       frameCamera.position.copy(controls.target.clone().add(offset));
     }
     if (keys['E'] || keys['KeyE'] || keys['ArrowDown']) {
       // Orbit pitch down
       const offset = frameCamera.position.clone().sub(controls.target);
-      const right = new THREE.Vector3().crossVectors(offset, new THREE.Vector3(0, 1, 0)).normalize();
+      let right = new THREE.Vector3().crossVectors(offset, new THREE.Vector3(0, 1, 0));
+      if (right.lengthSq() < 0.0001) {
+        right = new THREE.Vector3(1, 0, 0);
+      } else {
+        right.normalize();
+      }
       offset.applyAxisAngle(right, safeDelta * 0.8);
       frameCamera.position.copy(controls.target.clone().add(offset));
     }
