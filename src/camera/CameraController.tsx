@@ -293,6 +293,10 @@ export const CameraController: React.FC = () => {
         const liveInfo = resolveLiveTargetInfo(tr.targetId, simTimeDays, solarScaleMode);
         if (liveInfo) {
           tr.endTarget = liveInfo.position;
+          const targetVec = new THREE.Vector3(...liveInfo.position);
+          const offsetDir = new THREE.Vector3(0.5, 0.35, 0.8).normalize();
+          const cameraPos = targetVec.clone().add(offsetDir.multiplyScalar(liveInfo.framingDistance));
+          tr.endPos = [cameraPos.x, cameraPos.y, cameraPos.z];
         }
       }
 

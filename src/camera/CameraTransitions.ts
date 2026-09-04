@@ -21,7 +21,7 @@ export function smoothDampVector3(
   maxSpeed: number,
   deltaTime: number
 ): THREE.Vector3 {
-  // Critical damping algorithm
+  // Critical damping algorithm (Game Programming Gems)
   const safeSmoothTime = Math.max(0.0001, smoothTime);
   const omega = 2.0 / safeSmoothTime;
   const x = omega * deltaTime;
@@ -33,16 +33,16 @@ export function smoothDampVector3(
   // Clamp maximum speed
   const maxChange = maxSpeed * safeSmoothTime;
   const changeLength = change.length();
-  if (changeLength > maxChange) {
+  if (changeLength > maxChange && changeLength > 0.00001) {
     change.multiplyScalar(maxChange / changeLength);
   }
 
   const clampedTarget = current.clone().sub(change);
-  const temp = currentVelocity.clone().add(change.multiplyScalar(omega)).multiplyScalar(deltaTime);
-  
+  const temp = currentVelocity.clone().add(change.clone().multiplyScalar(omega)).multiplyScalar(deltaTime);
+
   currentVelocity.sub(temp.clone().multiplyScalar(omega)).multiplyScalar(exp);
-  
-  const output = clampedTarget.clone().add(change.add(temp).multiplyScalar(exp));
+
+  const output = clampedTarget.clone().add(change.clone().add(temp).multiplyScalar(exp));
 
   // Prevent overshooting
   if (originalTo.clone().sub(current).dot(output.clone().sub(originalTo)) > 0) {
