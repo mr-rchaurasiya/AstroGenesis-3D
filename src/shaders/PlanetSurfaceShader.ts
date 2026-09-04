@@ -80,8 +80,8 @@ export const PlanetFragmentShader = /* glsl */ `
     // Smooth terminator transition
     diffuse = smoothstep(-0.05, 0.35, NdotL);
 
-    // Deep-space ambient visibility
-    float ambient = 0.06;
+    // Deep-space ambient starlight visibility
+    float ambient = 0.32;
 
     vec3 surfaceColor = uBaseColor;
     float lat = vUv.y * 2.0 - 1.0; // [-1 at south pole, +1 at north pole]

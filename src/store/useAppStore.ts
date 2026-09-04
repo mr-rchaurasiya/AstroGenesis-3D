@@ -448,6 +448,8 @@ export const useAppStore = create<AppState>()(
     selectSolarBody: (id) => {
       set({
         selectedSolarBodyId: id,
+        selectedGalaxy: null,
+        selectedGalaxyId: null,
         showInfoPanel: id !== null,
       });
       if (id) {
