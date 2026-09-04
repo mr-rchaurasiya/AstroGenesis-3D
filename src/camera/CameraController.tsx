@@ -60,7 +60,8 @@ export const CameraController: React.FC = () => {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.enablePan = true;
-    controls.enableZoom = false; // Custom cursor-centric zoom handles wheel events
+    controls.enableZoom = true;
+    controls.zoomToCursor = true; // High-precision, mathematically stable cursor-centric zoom
     controls.enableRotate = true;
     // Prevent polar singularity / gimbal flip which causes NaN view matrices
     controls.minPolarAngle = 0.05;
@@ -70,10 +71,11 @@ export const CameraController: React.FC = () => {
       MIDDLE: THREE.MOUSE.PAN,
       RIGHT: THREE.MOUSE.PAN,
     };
-    controls.minDistance = 0.5;
-    controls.maxDistance = 80000;
+    controls.minDistance = 1.0;
+    controls.maxDistance = 45000;
     controls.rotateSpeed = 0.5;
     controls.panSpeed = 0.8;
+    controls.zoomSpeed = 1.0;
 
     const handleStart = () => {
       transitionRef.current = null;
@@ -88,84 +90,6 @@ export const CameraController: React.FC = () => {
       controls.removeEventListener('start', handleStart);
       controls.dispose();
       controlsRef.current = null;
-    };
-  }, [camera, gl.domElement]);
-
-  // Cursor-Centric (Zoom-to-Mouse-Pointer) Wheel Event Handler
-  useEffect(() => {
-    const domElement = gl.domElement;
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const controls = controlsRef.current;
-      if (!controls) return;
-
-      // If camera was transitioning, release to free mode
-      if (useAppStore.getState().cameraMode === 'TRANSITION') {
-        transitionRef.current = null;
-        useAppStore.getState().setCameraMode('FREE');
-      }
-
-      const rect = domElement.getBoundingClientRect();
-      const ndcX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const ndcY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-      // Determine scale-aware zoom speed
-      const cam = camera as THREE.PerspectiveCamera;
-      const currentDist = cam.position.distanceTo(controls.target);
-      if (isNaN(currentDist) || currentDist <= 0.01) return;
-
-      const zoomIntensity = Math.min(0.002, Math.max(0.0008, 0.0012 * (1 + Math.log10(Math.max(1, currentDist)) * 0.1)));
-      const zoomFactor = Math.exp(e.deltaY * zoomIntensity);
-
-      const newDist = currentDist * zoomFactor;
-
-      // Enforce bounds
-      if (newDist < controls.minDistance || newDist > controls.maxDistance) {
-        return;
-      }
-
-      // Cast ray from mouse NDC through camera
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), cam);
-      const ray = raycaster.ray;
-
-      // Create plane perpendicular to camera viewing direction passing through controls.target
-      const camForward = new THREE.Vector3().subVectors(controls.target, cam.position).normalize();
-      if (camForward.lengthSq() < 0.001) return;
-
-      const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camForward, controls.target);
-      const intersection = new THREE.Vector3();
-      const hit = ray.intersectPlane(plane, intersection);
-
-      if (hit && !isNaN(intersection.x) && !isNaN(intersection.y) && !isNaN(intersection.z)) {
-        const distFromTarget = intersection.distanceTo(controls.target);
-        // Only apply pivot offset if intersection is within reasonable distance
-        if (distFromTarget < currentDist * 3.0) {
-          const pivot = intersection;
-          const newCamPos = pivot.clone().add(cam.position.clone().sub(pivot).multiplyScalar(zoomFactor));
-          const newTarget = pivot.clone().add(controls.target.clone().sub(pivot).multiplyScalar(zoomFactor));
-
-          if (!isNaN(newCamPos.x) && !isNaN(newTarget.x)) {
-            cam.position.copy(newCamPos);
-            controls.target.copy(newTarget);
-            return;
-          }
-        }
-      }
-
-      // Fallback: standard camera forward zoom
-      const newCamPos = controls.target.clone().add(
-        cam.position.clone().sub(controls.target).multiplyScalar(zoomFactor)
-      );
-      if (!isNaN(newCamPos.x)) {
-        cam.position.copy(newCamPos);
-      }
-    };
-
-    domElement.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      domElement.removeEventListener('wheel', handleWheel);
     };
   }, [camera, gl.domElement]);
 
@@ -495,6 +419,11 @@ export const CameraController: React.FC = () => {
       frameCamera.near = near;
       frameCamera.far = far;
       frameCamera.updateProjectionMatrix();
+    }
+
+    // Clamp controls.target to prevent camera from drifting into infinite empty space
+    if (controls.target.length() > 20000) {
+      controls.target.clampLength(0, 20000);
     }
 
     // Update orbit controls

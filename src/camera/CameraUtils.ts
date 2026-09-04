@@ -192,19 +192,19 @@ export function calculateAdaptiveClippingPlanes(
   level: NavigationLevel = 'universe'
 ): { near: number; far: number } {
   if (level === 'moon' || cameraDistance < 5) {
-    return { near: 0.05, far: 50000 };
+    return { near: 0.1, far: 50000 };
   }
   if (level === 'planet' || cameraDistance < 50) {
-    return { near: 0.1, far: 60000 };
+    return { near: 0.2, far: 60000 };
   }
   if (level === 'solar-system' || cameraDistance < 800) {
-    return { near: 0.2, far: 80000 };
+    return { near: 0.5, far: 80000 };
   }
   if (level === 'galaxy' || cameraDistance < 3000) {
-    return { near: 0.5, far: 100000 };
+    return { near: 1.0, far: 100000 };
   }
   // Deep Universe Scale
-  return { near: 1.0, far: 120000 };
+  return { near: 2.0, far: 120000 };
 }
 
 /**
