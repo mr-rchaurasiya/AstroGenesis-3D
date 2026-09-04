@@ -1,0 +1,243 @@
+/**
+ * GalaxyConfig.ts
+ * Physical reference ranges and default configuration profiles for galaxy generation.
+ */
+
+import type { GalaxyMorphology, GalaxyParameters } from './GalaxyTypes';
+
+// ── Quality Settings for Galaxy Star & Dust Particles ────────────────────────
+
+export const GALAXY_QUALITY_SETTINGS = {
+  low: {
+    maxDetailedGalaxies: 1,
+    starCountMultiplier: 0.5,
+    dustCountMultiplier: 0.4,
+    lodFarDistance: 2500,
+    lodMediumDistance: 800,
+  },
+  medium: {
+    maxDetailedGalaxies: 2,
+    starCountMultiplier: 0.8,
+    dustCountMultiplier: 0.7,
+    lodFarDistance: 3200,
+    lodMediumDistance: 1100,
+  },
+  high: {
+    maxDetailedGalaxies: 4,
+    starCountMultiplier: 1.0,
+    dustCountMultiplier: 1.0,
+    lodFarDistance: 4000,
+    lodMediumDistance: 1400,
+  },
+  ultra: {
+    maxDetailedGalaxies: 6,
+    starCountMultiplier: 1.5,
+    dustCountMultiplier: 1.4,
+    lodFarDistance: 5000,
+    lodMediumDistance: 1800,
+  },
+} as const;
+
+// ── Default Morphology Profiles ──────────────────────────────────────────────
+
+export function getDefaultGalaxyParameters(morphology: GalaxyMorphology, seed: number = 1001): GalaxyParameters {
+  switch (morphology) {
+    case 'spiral':
+      return {
+        seed,
+        morphology: 'spiral',
+        subtype: 'Sb',
+        massSolar: 8.5e11,
+        radiusKpc: 28.0,
+        luminositySolar: 2.4e10,
+        starCountEstimate: 2.5e11,
+        sceneRadius: 75.0,
+        starParticleCount: 16000,
+        dustParticleCount: 2800,
+        bulgeRatio: 0.18,
+        diskThicknessRatio: 0.04,
+        coreBrightness: 1.5,
+        armCount: 2,
+        armTightness: 0.65,
+        armWidth: 0.28,
+        armAsymmetry: 0.08,
+        barLengthRatio: 0.0,
+        barWidthRatio: 0.0,
+        ellipticity: 0.0,
+        sersicIndex: 4.0,
+        clumpiness: 0.3,
+        asymmetryFactor: 0.1,
+        rotationSpeed: 1.0,
+        inclination: 0.45,
+        positionAngle: 0.8,
+        pitchAngle: 0.15,
+        temperatureBias: 0.1,
+        dustAbsorption: 0.65,
+      };
+
+    case 'barred-spiral':
+      return {
+        seed,
+        morphology: 'barred-spiral',
+        subtype: 'SBb',
+        massSolar: 1.1e12,
+        radiusKpc: 32.0,
+        luminositySolar: 3.2e10,
+        starCountEstimate: 4.0e11,
+        sceneRadius: 85.0,
+        starParticleCount: 18000,
+        dustParticleCount: 3200,
+        bulgeRatio: 0.22,
+        diskThicknessRatio: 0.045,
+        coreBrightness: 1.8,
+        armCount: 2,
+        armTightness: 0.58,
+        armWidth: 0.30,
+        armAsymmetry: 0.06,
+        barLengthRatio: 0.28,
+        barWidthRatio: 0.07,
+        ellipticity: 0.0,
+        sersicIndex: 4.0,
+        clumpiness: 0.35,
+        asymmetryFactor: 0.12,
+        rotationSpeed: 1.1,
+        inclination: 0.55,
+        positionAngle: 1.2,
+        pitchAngle: 0.1,
+        temperatureBias: 0.05,
+        dustAbsorption: 0.75,
+      };
+
+    case 'elliptical':
+      return {
+        seed,
+        morphology: 'elliptical',
+        subtype: 'E3',
+        massSolar: 2.2e12,
+        radiusKpc: 45.0,
+        luminositySolar: 5.5e10,
+        starCountEstimate: 1.0e12,
+        sceneRadius: 90.0,
+        starParticleCount: 15000,
+        dustParticleCount: 400,
+        bulgeRatio: 0.60,
+        diskThicknessRatio: 0.45,
+        coreBrightness: 2.2,
+        armCount: 0,
+        armTightness: 0.0,
+        armWidth: 0.0,
+        armAsymmetry: 0.0,
+        barLengthRatio: 0.0,
+        barWidthRatio: 0.0,
+        ellipticity: 0.35,
+        sersicIndex: 4.5,
+        clumpiness: 0.1,
+        asymmetryFactor: 0.05,
+        rotationSpeed: 0.3,
+        inclination: 0.3,
+        positionAngle: 0.5,
+        pitchAngle: 0.0,
+        temperatureBias: -0.4, // Older, redder population
+        dustAbsorption: 0.15,
+      };
+
+    case 'irregular':
+      return {
+        seed,
+        morphology: 'irregular',
+        subtype: 'Irr-I',
+        massSolar: 3.5e10,
+        radiusKpc: 12.0,
+        luminositySolar: 4.0e9,
+        starCountEstimate: 3.0e10,
+        sceneRadius: 45.0,
+        starParticleCount: 10000,
+        dustParticleCount: 1800,
+        bulgeRatio: 0.1,
+        diskThicknessRatio: 0.18,
+        coreBrightness: 0.9,
+        armCount: 1,
+        armTightness: 0.4,
+        armWidth: 0.5,
+        armAsymmetry: 0.6,
+        barLengthRatio: 0.0,
+        barWidthRatio: 0.0,
+        ellipticity: 0.4,
+        sersicIndex: 1.5,
+        clumpiness: 0.75,
+        asymmetryFactor: 0.65,
+        rotationSpeed: 0.6,
+        inclination: 0.7,
+        positionAngle: 2.1,
+        pitchAngle: 0.3,
+        temperatureBias: 0.4, // Active star formation, blue stars
+        dustAbsorption: 0.6,
+      };
+
+    case 'dwarf-spheroidal':
+      return {
+        seed,
+        morphology: 'dwarf-spheroidal',
+        subtype: 'dSph',
+        massSolar: 5.0e7,
+        radiusKpc: 2.5,
+        luminositySolar: 2.0e7,
+        starCountEstimate: 5.0e7,
+        sceneRadius: 22.0,
+        starParticleCount: 4500,
+        dustParticleCount: 100,
+        bulgeRatio: 0.7,
+        diskThicknessRatio: 0.6,
+        coreBrightness: 0.6,
+        armCount: 0,
+        armTightness: 0.0,
+        armWidth: 0.0,
+        armAsymmetry: 0.0,
+        barLengthRatio: 0.0,
+        barWidthRatio: 0.0,
+        ellipticity: 0.2,
+        sersicIndex: 1.2,
+        clumpiness: 0.15,
+        asymmetryFactor: 0.1,
+        rotationSpeed: 0.2,
+        inclination: 0.2,
+        positionAngle: 1.0,
+        pitchAngle: 0.0,
+        temperatureBias: -0.3,
+        dustAbsorption: 0.05,
+      };
+
+    case 'dwarf-irregular':
+      return {
+        seed,
+        morphology: 'dwarf-irregular',
+        subtype: 'dIrr',
+        massSolar: 1.2e8,
+        radiusKpc: 3.8,
+        luminositySolar: 8.0e7,
+        starCountEstimate: 1.5e8,
+        sceneRadius: 28.0,
+        starParticleCount: 5500,
+        dustParticleCount: 600,
+        bulgeRatio: 0.12,
+        diskThicknessRatio: 0.25,
+        coreBrightness: 0.7,
+        armCount: 0,
+        armTightness: 0.0,
+        armWidth: 0.0,
+        armAsymmetry: 0.4,
+        barLengthRatio: 0.0,
+        barWidthRatio: 0.0,
+        ellipticity: 0.45,
+        sersicIndex: 1.3,
+        clumpiness: 0.7,
+        asymmetryFactor: 0.5,
+        rotationSpeed: 0.4,
+        inclination: 0.6,
+        positionAngle: 1.8,
+        pitchAngle: 0.2,
+        temperatureBias: 0.25,
+        dustAbsorption: 0.4,
+      };
+  }
+}

@@ -1,0 +1,183 @@
+/**
+ * EducationTopics.ts
+ * Interactive guided lessons for Phase 11 Learning Mode.
+ * Provides multi-step educational pathways through stellar evolution, star birth,
+ * cosmic scale traversal, and relativistic remnants.
+ */
+
+import type { EducationalLesson } from './EducationTypes';
+
+export const EDUCATIONAL_LESSONS: EducationalLesson[] = [
+  {
+    id: 'how-stars-die',
+    title: 'How Does a Star Die?',
+    subtitle: 'From Core Exhaustion to White Dwarfs, Neutron Stars, and Black Holes',
+    estimatedMinutes: 5,
+    difficulty: 'Intermediate',
+    category: 'Stellar Astrophysics',
+    summary: 'Follow the dramatic terminal stages of stellar evolution and discover why a star’s initial birth mass dictates its final cosmic graveyard fate.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Core Hydrogen Exhaustion',
+        description: 'After spending millions to billions of years fusing hydrogen into helium in its core, the central nuclear furnace exhausts its primary fuel. Without the outward thermal pressure of fusion, the helium core begins to contract under gravity.',
+        targetScaleMode: 'stellar',
+        keyTakeaway: 'The exhaustion of core hydrogen ends the star’s stable Main Sequence era and breaks hydrostatic equilibrium.',
+        equationOrFact: 'Core Hydrogen Fraction: X_core → 0.0',
+      },
+      {
+        stepNumber: 2,
+        title: 'Core Contraction & Envelope Expansion',
+        description: 'As the inert core contracts gravitationally, its temperature surges. The surrounding hydrogen-rich shell is superheated, igniting fierce shell fusion. This massive energy flux pushes the outer envelope outward, expanding the star into a vast, luminous Red Giant or Supergiant.',
+        keyTakeaway: 'Core contraction and outer envelope expansion occur simultaneously in response to shell burning.',
+        equationOrFact: 'Radius expands up to 200× (Sun) or 1,000× (Massive Supergiant).',
+      },
+      {
+        stepNumber: 3,
+        title: 'Helium Fusion & Thermal Pulses',
+        description: 'When the central core temperature reaches ~100 million Kelvin (10⁸ K), helium nuclei begin fusing into carbon and oxygen via the Triple-Alpha process. In intermediate stars, late-stage thermal pulses create intense superwinds that shed outer mass.',
+        keyTakeaway: 'Triple-alpha fusion synthesizes carbon and oxygen, creating the building blocks for rocky worlds and life.',
+        equationOrFact: '3 ⁴He → ¹²C + γ (7.27 MeV released per reaction)',
+      },
+      {
+        stepNumber: 4,
+        title: 'The Great Mass Threshold (8 Solar Masses)',
+        description: 'Here, the cosmic paths diverge sharply. Stars with initial mass M ≲ 8 M☉ cannot achieve core temperatures hot enough to fuse carbon. Stars with M ≳ 8 M☉ continue advanced fusion (C, Ne, O, Si) all the way to an iron core.',
+        keyTakeaway: 'Initial mass determines whether a star gently sheds its envelope or undergoes cataclysmic core collapse.',
+        equationOrFact: 'Low-Mass (M ≲ 8 M☉) vs Massive (M ≳ 8 M☉)',
+      },
+      {
+        stepNumber: 5,
+        title: 'Low-Mass Fate: Planetary Nebula & White Dwarf',
+        description: 'For stars like our Sun, radiation pressure blows away the outer gaseous envelope into an expanding, glowing Planetary Nebula. The remaining exposed carbon-oxygen core is an Earth-sized White Dwarf supported by quantum electron degeneracy pressure.',
+        targetObjectId: 'white-dwarf',
+        keyTakeaway: 'White dwarfs have no fusion and cool over trillions of years via Mestel thermal radiation.',
+        equationOrFact: 'Chandrasekhar Limit: M_core < 1.44 M☉',
+      },
+      {
+        stepNumber: 6,
+        title: 'Massive Fate: Supernova & Neutron Star or Black Hole',
+        description: 'For massive stars, the inert iron core implodes in 0.25 seconds, triggering a Type II Supernova explosion (10⁴⁴ J). If the remnant core is 1.44 - 2.17 M☉, it becomes an ultra-dense Neutron Star / Pulsar. If the core exceeds the TOV limit (> 2.17 M☉), it collapses into a Schwarzschild Black Hole.',
+        targetObjectId: 'black-hole',
+        keyTakeaway: 'Core-collapse supernovae synthesize heavy elements and forge the universe’s most extreme relativistic objects.',
+        equationOrFact: 'Tolman-Oppenheimer-Volkoff (TOV) Limit: M_TOV ≈ 2.17 M☉',
+      },
+    ],
+  },
+  {
+    id: 'birth-of-stars',
+    title: 'The Birth of Stars & Planetary Systems',
+    subtitle: 'From Cold Molecular Clouds to Protoplanetary Disks and ZAMS',
+    estimatedMinutes: 4,
+    difficulty: 'Introductory',
+    category: 'Star Formation',
+    summary: 'Explore how vast, cold interstellar clouds of hydrogen gas and dust collapse under self-gravity to ignite the next generation of stars and solar systems.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Giant Molecular Clouds & Jeans Instability',
+        description: 'Stars are born within cold (10 - 20 K), dense Giant Molecular Clouds (GMCs) composed primarily of molecular hydrogen (H₂). When a region exceeds the Jeans Mass, internal gas pressure can no longer withstand gravity, initiating collapse.',
+        keyTakeaway: 'Cold temperatures and high densities are required for self-gravity to overcome gas pressure.',
+        equationOrFact: 'Jeans Mass: M_J ∝ T^(3/2) / ρ^(1/2)',
+      },
+      {
+        stepNumber: 2,
+        title: 'Hierarchical Fragmentation',
+        description: 'As the cloud collapses, dense clumps collapse faster than diffuse outer regions (t_ff ∝ ρ^(-1/2)). The cloud fragments into dozens or thousands of individual collapsing protostellar cores, forming stellar clusters.',
+        keyTakeaway: 'Cloud fragmentation produces a distribution of stellar masses described by the Initial Mass Function (IMF).',
+        equationOrFact: 'Kroupa (2001) IMF: Low-mass red dwarfs vastly outnumber massive stars.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Protostar & Circumstellar Accretion Disk',
+        description: 'Conservation of angular momentum prevents infalling gas from falling directly onto the central protostar, forming a spinning circumstellar accretion disk. Magnetocentrifugal forces launch energetic bipolar Herbig-Haro jets from the stellar poles.',
+        keyTakeaway: 'Accretion disks feed the growing star and provide the dust reservoir where planets form.',
+        equationOrFact: 'Accretion Luminosity: L_acc = G · M · Ṁ / R',
+      },
+      {
+        stepNumber: 4,
+        title: 'Kelvin-Helmholtz Contraction to ZAMS',
+        description: 'The young protostar contracts gravitationally on the Kelvin-Helmholtz timescale, heating its central core. When core temperature surpasses 10 million Kelvin, hydrogen fusion ignites. Outward radiation pressure halts contraction, and the star settles onto the Zero-Age Main Sequence (ZAMS).',
+        keyTakeaway: 'Core hydrogen ignition establishes stable hydrostatic equilibrium for the next millions or billions of years.',
+        equationOrFact: 'Ignition Threshold: T_core ≥ 1.0 × 10⁷ K',
+      },
+    ],
+  },
+  {
+    id: 'cosmic-scales',
+    title: 'Cosmic Scale Traversal: From Earth to the Cosmic Web',
+    subtitle: 'Understanding Distances Across 40 Orders of Magnitude',
+    estimatedMinutes: 6,
+    difficulty: 'Introductory',
+    category: 'Cosmology & Scales',
+    summary: 'Travel through the hierarchical nested scales of the universe without losing orientation, from human planetary scales to galactic filaments.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'The Solar System Scale (Astronomical Units)',
+        description: 'Within the Solar System, distances are measured in Astronomical Units (1 AU ≈ 150 million km, the Earth-Sun distance). Neptune orbits at 30 AU, and the Kuiper Belt extends past 50 AU.',
+        targetScaleMode: 'solar',
+        keyTakeaway: 'The inner solar system is compact, but the outer reaches are vast and sparsely populated.',
+        equationOrFact: '1 AU = 1.496 × 10¹¹ meters (8.3 light-minutes)',
+      },
+      {
+        stepNumber: 2,
+        title: 'The Interstellar Neighborhood (Parsecs & Light-Years)',
+        description: 'The distance to our closest stellar neighbor, Proxima Centauri, is 4.24 light-years (1.30 pc), which is ~268,000 AU. If the Sun were a marble, the nearest star would be another marble over 300 km away.',
+        keyTakeaway: 'Interstellar space is overwhelmingly empty vacuum.',
+        equationOrFact: '1 Parsec (pc) = 3.26 Light-Years = 206,265 AU',
+      },
+      {
+        stepNumber: 3,
+        title: 'The Galactic Scale (Kiloparsecs)',
+        description: 'Our Milky Way galaxy is a barred spiral containing ~100 - 400 billion stars, spanning roughly 30 kiloparsecs (100,000 light-years) in diameter. Our Solar System orbits the galactic center at R₀ ≈ 8 kpc every 230 million years.',
+        targetScaleMode: 'galaxy',
+        keyTakeaway: 'Galaxies are the primary stellar continents of the cosmos.',
+        equationOrFact: '1 kpc = 1,000 parsecs = 3.086 × 10¹⁹ meters',
+      },
+      {
+        stepNumber: 4,
+        title: 'The Cosmological Scale (Megaparsecs & Cosmic Web)',
+        description: 'On scales exceeding 10 Megaparsecs (Mpc), galaxies are gravitationally bound into clusters and aligned along vast filaments of dark matter and gas known as the Cosmic Web, separated by enormous cosmic voids.',
+        targetScaleMode: 'universe',
+        keyTakeaway: 'The universe is homogeneous and isotropic on the largest scales, organized in a cosmic filamentary web.',
+        equationOrFact: 'Observable Universe Diameter ≈ 28.5 Gigaparsecs (93 Billion light-years)',
+      },
+    ],
+  },
+  {
+    id: 'compact-remnants',
+    title: 'Compact Remnants & Relativistic Physics',
+    subtitle: 'White Dwarfs, Pulsars, and Black Holes Under General Relativity',
+    estimatedMinutes: 5,
+    difficulty: 'Advanced',
+    category: 'Relativistic Astrophysics',
+    summary: 'Compare the extreme densities, quantum degeneracy mechanics, and general relativistic metrics of the three terminal endpoints of stellar evolution.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'White Dwarfs: Quantum Electron Degeneracy',
+        description: 'Supported by electron degeneracy pressure. Because of quantum mechanics, adding mass causes the star to shrink (R ∝ M^(-1/3)). At the Chandrasekhar limit (1.44 M☉), electrons reach relativistic speeds and collapse is unavoidable.',
+        targetObjectId: 'white-dwarf',
+        keyTakeaway: 'White dwarfs exhibit an inverted mass-radius relation governed by Fermi-Dirac quantum statistics.',
+        equationOrFact: 'Density: ρ ≈ 10⁹ kg/m³ (1 ton per cubic centimeter)',
+      },
+      {
+        stepNumber: 2,
+        title: 'Neutron Stars: Nuclear Saturation & Pulsar Beams',
+        description: 'Formed when electrons and protons are crushed into neutrons. A neutron star packs 1.4 - 2.1 M☉ into an 11.5 km sphere. Escape velocity reaches ~61% the speed of light. Rotating magnetic fields create coherent relativistic synchrotron beams.',
+        targetObjectId: 'neutron-star',
+        keyTakeaway: 'Neutron stars represent the densest physical matter directly observable in the universe.',
+        equationOrFact: 'Compactness: Ξ = GM / (R·c²) ≈ 0.185 (0.5 = Black Hole)',
+      },
+      {
+        stepNumber: 3,
+        title: 'Black Holes: Gravitational Horizons & Singularities',
+        description: 'When mass exceeds the TOV limit, nothing in nature can resist gravity. Spacetime curves infinitely to a central singularity enclosed by an event horizon at rs = 2GM/c². Photons orbit at 1.5 rs, and stable circular orbits end at the ISCO (3.0 rs).',
+        targetObjectId: 'black-hole',
+        keyTakeaway: 'Black holes are defined purely by mass, electric charge, and spin (No-Hair Theorem).',
+        equationOrFact: 'Schwarzschild Radius: r_s = 2GM/c² ≈ 2.95 km · (M/M☉)',
+      },
+    ],
+  },
+];
