@@ -539,8 +539,9 @@ export const useAppStore = create<AppState>()(
     resetCamera: () =>
       set({
         resetCameraRequested: true,
-        cameraMode: 'FREE',
         focusTargetId: null,
+        selectedSolarBodyId: null,
+        selectedGalaxyId: null,
       }),
 
     clearResetCameraRequest: () =>

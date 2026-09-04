@@ -175,9 +175,8 @@ export const CameraController: React.FC = () => {
       startTransition([0, 0, 140], [0, 0, 0], undefined, false);
     }
 
-    exitFocus();
     clearResetCameraRequest();
-  }, [resetCameraRequested, isSolarSystemMode, isMilkyWayMode, exitFocus, clearResetCameraRequest, startTransition]);
+  }, [resetCameraRequested, isSolarSystemMode, isMilkyWayMode, clearResetCameraRequest, startTransition]);
 
   // Keyboard Event Listeners
   useEffect(() => {
