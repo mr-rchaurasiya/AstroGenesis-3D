@@ -97,6 +97,8 @@ const SingleComet: React.FC<SingleCometProps> = ({
 
     // Calculate current position in space
     const [px, py, pz] = computeKeplerianPosition(orbitElements, simDays, scaleMode);
+    if (isNaN(px) || isNaN(py) || isNaN(pz)) return;
+
     const pos = new THREE.Vector3(px, py, pz);
     cometGroupRef.current.position.copy(pos);
 
@@ -111,17 +113,15 @@ const SingleComet: React.FC<SingleCometProps> = ({
       if (tailMeshRef.current) {
         tailMeshRef.current.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), sunDir);
         
-        // Solar activity: close to sun = longer and brighter tail
-        const proximity = Math.max(0.0, Math.min(1.0, (120.0 - distToSun) / 100.0));
+        // Solar activity: closer to sun = longer and brighter tail
+        const proximity = Math.max(0.15, Math.min(1.0, (140.0 - distToSun) / 120.0));
         
-        if (tailMaterialRef.current) {
-          tailMaterialRef.current.uniforms.uSunProximity.value = proximity;
-          tailMaterialRef.current.uniforms.uTime.value += delta;
-        }
+        tailShader.uniforms.uSunProximity.value = proximity;
+        tailShader.uniforms.uTime.value += delta;
 
         // Scale tail length based on proximity
-        const tailLength = Math.max(2.0, proximity * 25.0);
-        const tailWidth = Math.max(0.5, proximity * 4.0);
+        const tailLength = Math.max(3.0, proximity * 28.0);
+        const tailWidth = Math.max(0.6, proximity * 4.5);
         tailMeshRef.current.scale.set(tailWidth, tailLength, tailWidth);
       }
     }

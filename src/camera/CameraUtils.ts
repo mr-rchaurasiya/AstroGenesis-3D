@@ -145,8 +145,8 @@ export function resolveLiveTargetInfo(
       name: comet.name,
       type: 'comet',
       position: [cx, cy, cz],
-      radius: 0.35,
-      framingDistance: 3.5,
+      radius: 0.6,
+      framingDistance: 5.5,
       parentBodyId: 'sun',
       level: 'planet',
     };

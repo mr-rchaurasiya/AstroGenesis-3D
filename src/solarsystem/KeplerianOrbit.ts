@@ -16,22 +16,44 @@ const DEG2RAD = Math.PI / 180.0;
  * @returns Eccentric anomaly E in radians
  */
 export function solveKepler(M: number, e: number): number {
-  // Normalize M into [0, 2*pi)
+  // Normalize M into [-pi, pi]
   let m = M % (Math.PI * 2);
-  if (m < 0) m += Math.PI * 2;
+  if (m < -Math.PI) m += Math.PI * 2;
+  if (m > Math.PI) m -= Math.PI * 2;
 
-  // Initial guess
-  let E = e > 0.8 ? Math.PI : m;
-
-  for (let i = 0; i < 15; i++) {
-    const f = E - e * Math.sin(E) - m;
-    const fPrime = 1.0 - e * Math.cos(E);
-    const delta = f / fPrime;
-    E -= delta;
-    if (Math.abs(delta) < 1e-7) break;
+  // Robust starter for high eccentricity orbits (Danby-Mikkola cubic starter)
+  let E: number;
+  if (e < 0.75) {
+    E = m;
+  } else {
+    // For high eccentricity (e.g. Halley e=0.967, Hale-Bopp e=0.995)
+    const alpha = (1.0 - e) / (4.0 * e + 0.5);
+    const beta = m / (8.0 * e + 1.0);
+    const disc = beta * beta + alpha * alpha * alpha;
+    const z = Math.cbrt(beta + Math.sign(beta) * Math.sqrt(Math.max(0, disc)));
+    const s = z - alpha / (Math.abs(z) < 1e-6 ? 1 : z);
+    E = m + e * (3.0 * s - 4.0 * s * s * s);
   }
 
-  return E;
+  // Halley's cubic iteration (never divides by zero, rapid convergence)
+  for (let i = 0; i < 20; i++) {
+    const sE = Math.sin(E);
+    const cE = Math.cos(E);
+    const f = E - e * sE - m;
+    const f1 = 1.0 - e * cE;
+    const f2 = e * sE;
+    const f3 = e * cE;
+
+    const d1 = -f / Math.max(1e-6, f1);
+    const d2 = -f / Math.max(1e-6, f1 + 0.5 * d1 * f2);
+    const d3 = -f / Math.max(1e-6, f1 + 0.5 * d2 * f2 + (1.0 / 6.0) * d2 * d2 * f3);
+
+    const step = isNaN(d3) || !isFinite(d3) ? (d1 || 0) : d3;
+    E += step;
+    if (Math.abs(f) < 1e-8) break;
+  }
+
+  return isNaN(E) || !isFinite(E) ? m : E;
 }
 
 /**
